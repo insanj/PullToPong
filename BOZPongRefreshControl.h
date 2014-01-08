@@ -85,7 +85,7 @@
  *  the standard backgroundColor property to set the
  *  background color.
  */
-@property (strong, nonatomic) UIColor* foregroundColor;
+@property (strong, nonatomic) UIColor *foregroundColor;
 
 /**
  *  This controls whether the refresh control is covered

@@ -1,5 +1,5 @@
 /* Core refresh control class, contains _UIRefreshControlContentView (below) */
-@interface UIRefreshControl (PullToPong) /*: UIControl {
+@interface UIRefreshControl (Private) /*: UIControl {
     int _style;
     id *_contentView; //_UIRefreshControlContentView
     UIScrollView *_scrollView;
@@ -30,10 +30,10 @@
 +(Class)_contentViewClassForStyle:(int)arg1;
 
 // lifecycle
--(instancetype)init;
--(instancetype)initWithCoder:(id)arg1;
--(instancetype)initWithFrame:(CGRect)arg1;
--(instancetype)initWithStyle:(int)arg1;
+-(UIRefreshControl *)init;
+-(UIRefreshControl *)initWithCoder:(id)arg1;
+-(UIRefreshControl *)initWithFrame:(CGRect)arg1;
+-(UIRefreshControl *)initWithStyle:(int)arg1;
 -(void)encodeWithCoder:(id)arg1;
 -(void)dealloc;
 
@@ -100,7 +100,7 @@
     id block;
 }
 
-+(id)delegateWithCompletionBlock:(id)arg1;
++(_UIRefreshControlAnimationDelegate *)delegateWithCompletionBlock:(id)arg1;
 -(void)animationDidStop:(id)arg1 finished:(BOOL)arg2;
 -(void)dealloc;
 @end
@@ -163,7 +163,7 @@
 @property BOOL areAnimationsValid;
 
 // lifecycle
--(instancetype)initWithFrame:(CGRect)arg1;
+-(_UIRefreshControlDefaultContentView *)initWithFrame:(CGRect)arg1;
 -(void)dealloc;
 
 // view management
@@ -234,7 +234,7 @@
 @property BOOL areAnimationsValid;
 
 // lifecycle
--(instancetype)initWithFrame:(CGRect)arg1;
+-(_UIRefreshControlModernContentView *)initWithFrame:(CGRect)arg1;
 -(void)dealloc;
 
 // view management
