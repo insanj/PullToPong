@@ -1,0 +1,10 @@
+Package: com.insanj.pulltopong
+Name: Pull to Pong
+Pre-Depends: firmware (>= 7.0)
+Depends: mobilesubstrate 
+Version: 0.1
+Architecture: iphoneos-arm
+Description: Replace "pull to"refresh" with pong!
+Maintainer: Julian Weiss <me@insanj.com>
+Author: Julian (insanj) Weiss
+Section: Tweaks
