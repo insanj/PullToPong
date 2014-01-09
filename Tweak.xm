@@ -4,59 +4,75 @@
 #import "UIRefreshControl.h"
 #import "CydiaSubstrate.h"
 
-static NSMutableArray *lastDelegates; // _UIRefreshControlAnimationDelegate *lastDelegate
+@interface _UIRefreshControlAnimationDelegate (PullToPong)
+-(void)assignSender:(BOZPongRefreshControl *)arg1;
+@end
 
 %hook _UIRefreshControlAnimationDelegate
-+(_UIRefreshControlAnimationDelegate *)delegateWithCompletionBlock:(id)arg1{
-	NSLog(@"---- in delegate :%@ ", arg1);
+static BOZPongRefreshControl *sender;
+%new -(void)assignSender:(BOZPongRefreshControl *)arg1{
+	sender = arg1;
+}
 
-	_UIRefreshControlAnimationDelegate *delegate = %orig;
-	if(!lastDelegates)
-		lastDelegates = [[NSMutableArray alloc] init];
-	[lastDelegates addObject:delegate];
-	return delegate;
++(_UIRefreshControlAnimationDelegate *)delegateWithCompletionBlock:(id)arg1{
+	[sender assignCompletionBlock:arg1];
+	return %orig;
 }
 %end
 
-@interface UIPongScrollViewDelegate : UIScrollViewDelegate
-@property (nonatomic, retain) BOZPongRefreshControl *sender;
-@end
-
-@implementation UIPongScrollView
--(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
-	[super scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
-	[sender scrollViewDidEndDragging];
+%hook UIScrollViewDelegate
+static BOZPongRefreshControl *sender;
+%new -(void)assignSender:(BOZPongRefreshControl *)arg1{
+	sender = arg1;
 }
-@end
+
+-(void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate{
+	NSLog(@"--- in delegate ended dragging with sender %@", sender);
+	%orig;
+	if(sender)
+		[sender scrollViewDidEndDragging];
+}
+%end
 
 @interface UIRefreshControl (PullToPong)
 -(void)prepPongRefresh;
+-(void)scrollViewDidEndDragging;
+-(void)assignCompletionBlock:(id)arg1;
 @end
 
 %hook UIRefreshControl
 BOZPongRefreshControl *pongControl;
+id completionBlock;
 
+/* New methods to create pongControl, load in required delegates/data, and call sufficient blocks */
 %new -(void)prepPongRefresh{
 	NSLog(@"---- prep pong");
+	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	[scrollView.delegate assignSender:pongControl];
 
 	[self setHidden:YES];
 	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
 	pongControl = [BOZPongRefreshControl attachToScrollView:scrollView withRefreshTarget:self andRefreshAction:@selector(finishAnimation)];
 }
 
-%new -(void)finishAnimation{
-	NSLog(@"---- finish animation");
-
-	_UIRefreshControlAnimationDelegate *delegate = [lastDelegates objectAtIndex:0];
-	[delegate animationDidStop:nil finished:YES];
-	[lastDelegates removeObjectAtIndex:0];
-
-	// if nonfunctional, could use:
-	//[[NSOperationQueue mainQueue] addOperationWithBlock: ^{
+%new -(void)assignCompletionBlock:(id)arg1{
+	NSLog(@"---- assign completionBlock");
+	completionBlock = arg1;
 }
 
+%new -(void)scrollViewDidEndDragging{
+	NSLog(@"---- end dragging");
+	[pongControl scrollViewDidEndDragging];
+}
+
+%new -(void)finishAnimation{
+	NSLog(@"---- finish animation");
+	[[NSOperationQueue mainQueue] addOperationWithBlock:completionBlock];
+}
+
+/* Override standard UIRefreshControl methods, convert into PongRefreshControl versions */
 -(void)beginRefreshing{
-	NSLog(@"---- being refreshing");
+	NSLog(@"---- begin refreshing");
 	[pongControl beginLoading];
 }
 
@@ -70,12 +86,18 @@ BOZPongRefreshControl *pongControl;
 	[pongControl scrollViewDidScroll];
 }
 
--(float)revealedFraction{
-	NSLog(@"---- revealed fraction");
-	[pongControl scrollViewDidEndDragging];
+/* Experimentation methods-- can these be used? */
+-(int)refreshControlState{
+	NSLog(@"---- refresh control state:%i", %orig);
 	return %orig;
 }
 
+-(void)_update{
+	NSLog(@"---- _update");
+	%orig;
+}
+
+/* Override initializations to properly init Pong refresh control */
 -(UIRefreshControl *)init{
 	self = %orig;
 	[self prepPongRefresh];
