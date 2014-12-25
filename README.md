@@ -1,9 +1,10 @@
-Pull To Pong
-=======================
+# Pull To Pong
 
 Replace all standard occurences of "pull to refresh" with [pull to pong](https://github.com/boztalay/BOZPongRefreshControl)! Idea by [Sam Marshall](https://twitter.com/Dirk_Gently/status/420303027510464514).
 
----------------------------------------	
+Unfinished due to unexpected problems and lack of support :(
+
+## License
 [Creative Commons Attribution-NonCommercial 3.0 United States License](http://creativecommons.org/licenses/by-nc/3.0/us/) as of 2014:
 
 	Creative Commons Attribution-NonCommercial 3.0 United States License
